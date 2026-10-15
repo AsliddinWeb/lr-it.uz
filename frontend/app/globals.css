@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f8f9fc;
+  --surface: #ffffff;
+  --surface-2: #f1f2f8;
+  --border: #e6e8f0;
+  --text-primary: #131522;
+  --text-muted: #6b7085;
+  --primary: #4338ca;
+  --primary-soft: #eef0fd;
+  --success: #0e9f6e;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --accent: #e8590c;
+}
+
+.dark {
+  --bg: #0b0d14;
+  --surface: #12141f;
+  --surface-2: #1a1d2b;
+  --border: #242838;
+  --text-primary: #f1f2f8;
+  --text-muted: #8a8fa3;
+  --primary: #6366f1;
+  --primary-soft: #1e1f3a;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --accent: #f97316;
+}
+
+/* Hero and footer intentionally stay dark regardless of site theme (premium "anchor" pattern). */
+:root {
+  --dark-bg: #0b0d14;
+  --dark-surface: #12141f;
+  --dark-border: #242838;
+  --dark-text: #f1f2f8;
+  --dark-text-muted: #9297ab;
+}
+
+/* Sidebar-only dark palette — slate-based, kept independent from the footer's --dark-* anchor tokens. */
+:root {
+  --sidebar-bg: #0f172a;
+  --sidebar-surface: #1e293b;
+  --sidebar-border: #2b3a52;
+  --sidebar-text: #f1f5f9;
+  --sidebar-text-muted: #94a3b8;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-soft: rgba(99, 102, 241, 0.16);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
