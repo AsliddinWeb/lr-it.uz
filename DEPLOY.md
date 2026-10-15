@@ -56,9 +56,9 @@ Certbot (6-qadam) DNS to'g'ri bo'lmaguncha sertifikat bera olmaydi.
 ## 2. Kodni serverga olish
 
 ```bash
-sudo mkdir -p /opt/lr-it && sudo chown $USER /opt/lr-it
-git clone https://github.com/AsliddinWeb/lr-it.uz.git /opt/lr-it
-cd /opt/lr-it
+cd /home/projects
+git clone https://github.com/AsliddinWeb/lr-it.uz.git lr-it.uz
+cd /home/projects/lr-it.uz
 ```
 
 ## 3. Sozlamalar (`.env`) va ishga tushirish
@@ -125,7 +125,7 @@ Piston `amd64` imidj — bu serverda (x86_64) tabiiy ishlaydi.
 ## 4. Serverdagi nginx (domenlarni 8700 ga ulash)
 
 ```bash
-sudo cp /opt/lr-it/infra/host-nginx/lr-it.conf /etc/nginx/sites-available/lr-it.conf
+sudo cp /home/projects/lr-it.uz/infra/host-nginx/lr-it.conf /etc/nginx/sites-available/lr-it.conf
 sudo ln -s /etc/nginx/sites-available/lr-it.conf /etc/nginx/sites-enabled/lr-it.conf
 ```
 
@@ -184,7 +184,7 @@ sudo certbot --nginx -d lr-it.uz -d www.lr-it.uz -d lr-it.neonsoft.uz
 ## Yangilash (yangi kod chiqqanda)
 
 ```bash
-cd /opt/lr-it
+cd /home/projects/lr-it.uz
 git pull
 docker compose up -d --build        # migratsiyalar avtomatik qo'llanadi
 docker image prune -f               # eski imidjlarni tozalash
@@ -216,7 +216,7 @@ docker run --rm -v lrit_minio_data:/data -v ~:/backup alpine tar czf /backup/lri
 
 Kunlik avtomatik zaxira uchun `crontab -e` ga qo'shing:
 ```
-0 3 * * * cd /opt/lr-it && docker compose exec -T postgres pg_dump -U edtech edtech | gzip > /root/backups/lrit-db-$(date +\%F).sql.gz
+0 3 * * * cd /home/projects/lr-it.uz && docker compose exec -T postgres pg_dump -U edtech edtech | gzip > /root/backups/lrit-db-$(date +\%F).sql.gz
 ```
 (`mkdir -p /root/backups` qilib qo'ying, eski fayllarni vaqti-vaqti bilan o'chirib turing.)
 
