@@ -23,7 +23,7 @@ docker --version && docker compose version
 nginx -v && certbot --version
 ```
 
-- **Xotira.** Oxirgi tekshiruvda xotira 70%, swap 50% edi. Frontend imidjini yig'ish (`next build`) va Piston ancha xotira oladi. Yig'ish paytida server qotib qolmasligi uchun 2 GB swap qo'shib qo'ying (agar yetarli bo'lmasa):
+- **Xotira.** Server 2 GB (boshqa loyihalar bilan bo'lishiladi), shuning uchun `docker-compose.prod.yml` da backend 1 worker bilan ishlaydi va har bir konteynerga xotira limiti qo'yilgan (xotira yetmasa shu stack'ning o'z konteyneri to'xtaydi, qo'shni loyihalar emas). Oxirgi tekshiruvda xotira 70%, swap 50% edi. Frontend imidjini yig'ish (`next build`) va Piston ancha xotira oladi. Yig'ish paytida server qotib qolmasligi uchun 2 GB swap qo'shib qo'ying (agar yetarli bo'lmasa):
   ```bash
   sudo fallocate -l 2G /swapfile2 && sudo chmod 600 /swapfile2
   sudo mkswap /swapfile2 && sudo swapon /swapfile2
@@ -76,7 +76,7 @@ openssl rand -hex 32     # JWT_SECRET uchun
 ```
 
 - `POSTGRES_PASSWORD` ni yozing va **xuddi shu parolni** `DATABASE_URL` ichidagi `BU_YERGA_POSTGRES_PAROLI` o'rniga qo'ying.
-- `MINIO_ACCESS_KEY` — istalgan uzun nom, `MINIO_SECRET_KEY` — parol.
+- `MINIO_ACCESS_KEY` — kamida 3 belgili nom (masalan `lritminio`), `MINIO_SECRET_KEY` — kamida 8 belgili parol. Qisqaroq bo'lsa MinIO ishga tushmaydi.
 - `GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `SMTP_*` — mavjud bo'lsa shu yerga. Bo'sh qolsa: AI yordamchi, bot va email xatlari (OTP, parolni tiklash) ishlamaydi, qolgan hammasi ishlaydi.
 - Qolganlarini (`PUBLIC_BASE_URL`, `CORS_ORIGINS`, `ENVIRONMENT`) o'zgartirmang.
 
