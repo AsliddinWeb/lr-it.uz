@@ -6,7 +6,8 @@ from app.core.config import settings
 
 _RUNTIMES = {
     "python": {"language": "python", "version": "3.12.0"},
-    "cpp": {"language": "gcc", "version": "10.2.0"},
+    # Piston'da "gcc" — bu C kompilyatorining taxallusi; C++ uchun "c++" kerak (aks holda <iostream> topilmaydi).
+    "cpp": {"language": "c++", "version": "10.2.0"},
 }
 
 _FILENAMES = {"python": "main.py", "cpp": "main.cpp"}
