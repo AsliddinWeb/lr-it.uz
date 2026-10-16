@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
-import { Sora, Inter } from "next/font/google";
 
 import { QueryClientProviderWrapper } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
+// Shriftlar loyiha ichida (npm paketlari) — build va ishlash vaqtida tashqi serverga (Google Fonts) bog'liq emas.
+import "@fontsource/sora/latin-700.css";
+import "@fontsource/sora/latin-800.css";
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-500.css";
+import "@fontsource/inter/latin-600.css";
+
 import "./globals.css";
-
-const sora = Sora({
-  subsets: ["latin"],
-  weight: ["700", "800"],
-  variable: "--font-sora",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   title: "EdTech — bepul IT ta'lim platformasi",
@@ -30,7 +24,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="uz" suppressHydrationWarning>
-      <body className={`${sora.variable} ${inter.variable} font-sans`}>
+      <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryClientProviderWrapper>
             {children}

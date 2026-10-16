@@ -75,7 +75,10 @@ async def download_certificate_pdf(number: str, db: AsyncSession = Depends(get_d
     if certificate is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bunday sertifikat topilmadi")
 
-    pdf_bytes = await storage.download_bytes(certificate.pdf_object_key)
+    try:
+        pdf_bytes = await storage.download_bytes(certificate.pdf_object_key)
+    except FileNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sertifikat fayli serverda topilmadi")
 
     return StreamingResponse(
         io.BytesIO(pdf_bytes),

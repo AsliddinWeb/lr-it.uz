@@ -1,59 +1,42 @@
-import asyncio
-import io
+"""Fayllarni (sertifikat PDF'lari, mavzu resurslari) diskdagi papkada saqlash.
 
-from minio import Minio
+Oldin MinIO ishlatilgan edi, lekin uning rasmiy Docker imidjlari endi chiqarilmaydi.
+Interfeys o'zgarmagan: `upload_bytes` va `download_bytes` — chaqiruvchi kodga tegilmaydi.
+`settings.STORAGE_DIR` Docker volume sifatida ulanadi, shuning uchun fayllar konteyner
+qayta yaratilganda ham saqlanadi.
+"""
+
+import asyncio
+from pathlib import Path
 
 from app.core.config import settings
 
-_client: Minio | None = None
+
+def _resolve(object_key: str) -> Path:
+    """Kalitni saqlash papkasi ichidagi yo'lga aylantiradi; papkadan tashqariga chiqishni rad etadi."""
+    root = Path(settings.STORAGE_DIR).resolve()
+    path = (root / object_key).resolve()
+    if not path.is_relative_to(root):
+        raise ValueError(f"Noto'g'ri fayl kaliti: {object_key!r}")
+    return path
 
 
-def _get_client() -> Minio:
-    global _client
-    if _client is None:
-        _client = Minio(
-            settings.MINIO_ENDPOINT,
-            access_key=settings.MINIO_ACCESS_KEY,
-            secret_key=settings.MINIO_SECRET_KEY,
-            secure=False,
-        )
-    return _client
-
-
-def _ensure_bucket_sync() -> None:
-    client = _get_client()
-    if not client.bucket_exists(settings.MINIO_BUCKET):
-        client.make_bucket(settings.MINIO_BUCKET)
-
-
-async def ensure_bucket() -> None:
-    await asyncio.to_thread(_ensure_bucket_sync)
-
-
-def _upload_bytes_sync(object_key: str, data: bytes, content_type: str) -> None:
-    client = _get_client()
-    client.put_object(
-        settings.MINIO_BUCKET,
-        object_key,
-        io.BytesIO(data),
-        length=len(data),
-        content_type=content_type,
-    )
+def _upload_bytes_sync(object_key: str, data: bytes) -> None:
+    path = _resolve(object_key)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Avval vaqtinchalik faylga yozamiz: yuklash uzilsa, yarim fayl qolmaydi.
+    tmp = path.with_name(path.name + ".part")
+    tmp.write_bytes(data)
+    tmp.replace(path)
 
 
 async def upload_bytes(object_key: str, data: bytes, content_type: str) -> None:
-    await ensure_bucket()
-    await asyncio.to_thread(_upload_bytes_sync, object_key, data, content_type)
+    # content_type bazadagi LessonResource ichida saqlanadi, diskda alohida yozish shart emas.
+    await asyncio.to_thread(_upload_bytes_sync, object_key, data)
 
 
 def _download_bytes_sync(object_key: str) -> bytes:
-    client = _get_client()
-    response = client.get_object(settings.MINIO_BUCKET, object_key)
-    try:
-        return response.read()
-    finally:
-        response.close()
-        response.release_conn()
+    return _resolve(object_key).read_bytes()
 
 
 async def download_bytes(object_key: str) -> bytes:

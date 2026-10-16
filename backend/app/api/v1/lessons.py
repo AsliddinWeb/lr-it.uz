@@ -1,5 +1,6 @@
 import io
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
@@ -90,7 +91,8 @@ async def upload_lesson_resource(
     assert_course_access(lesson.module.course, user)
 
     data = await file.read()
-    object_key = f"lessons/{lesson_id}/{uuid.uuid4()}-{file.filename}"
+    safe_name = Path(file.filename or "fayl").name or "fayl"
+    object_key = f"lessons/{lesson_id}/{uuid.uuid4()}-{safe_name}"
     content_type = file.content_type or "application/octet-stream"
     await storage.upload_bytes(object_key, data, content_type)
 
@@ -144,7 +146,10 @@ async def download_lesson_resource(
 
     await get_lesson_with_access(resource.lesson_id, user, db)
 
-    data = await storage.download_bytes(resource.object_key)
+    try:
+        data = await storage.download_bytes(resource.object_key)
+    except FileNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fayl serverda topilmadi")
     return StreamingResponse(
         io.BytesIO(data),
         media_type=resource.content_type,

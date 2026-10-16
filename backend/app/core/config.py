@@ -21,10 +21,7 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_USERNAME: str = ""
     PISTON_URL: str = "http://piston:2000"
 
-    MINIO_ENDPOINT: str = "minio:9000"
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET: str = "edtech"
+    STORAGE_DIR: str = "/data/storage"
 
     PUBLIC_BASE_URL: str = "http://localhost:8700"
 

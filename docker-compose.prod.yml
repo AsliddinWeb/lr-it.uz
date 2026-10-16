@@ -32,19 +32,6 @@ services:
     networks:
       - edtech-network
 
-  minio:
-    image: minio/minio
-    restart: unless-stopped
-    mem_limit: 256m
-    command: server /data
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY .env faylida kerak}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY .env faylida kerak}
-    volumes:
-      - minio_data:/data
-    networks:
-      - edtech-network
-
   piston:
     image: ghcr.io/engineer-man/piston
     restart: unless-stopped
@@ -71,6 +58,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    volumes:
+      - storage_data:/data/storage
     networks:
       - edtech-network
 
@@ -121,5 +110,5 @@ networks:
 
 volumes:
   postgres_data:
-  minio_data:
+  storage_data:
   piston_data:

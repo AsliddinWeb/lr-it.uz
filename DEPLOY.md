@@ -2,6 +2,8 @@
 
 Server: Ubuntu 22.04 (`164.92.240.184`). Domenlar: `lr-it.uz`, `www.lr-it.uz`, `lr-it.neonsoft.uz`.
 
+> **Eslatma:** fayllar (sertifikat PDF'lari, mavzu resurslari) MinIO'da emas, `storage_data` Docker volume'ida saqlanadi: MinIO'ning rasmiy Docker imidjlari endi chiqarilmaydi.
+
 ## Qanday ishlaydi
 
 ```
@@ -10,7 +12,7 @@ Brauzer ──443──> serverdagi nginx (SSL, certbot) ──> 127.0.0.1:8700 
 ```
 
 - **8700-port faqat `127.0.0.1` da ochiladi** — tashqaridan unga to'g'ridan-to'g'ri kirib bo'lmaydi, faqat domen orqali.
-- Postgres, Redis, MinIO, Piston va bot tashqariga umuman chiqarilmagan (faqat Docker ichki tarmog'ida).
+- Postgres, Redis, Piston va bot tashqariga umuman chiqarilmagan (faqat Docker ichki tarmog'ida).
 - Serverda boshqa loyihalar ham ishlayotgani uchun `docker-compose.prod.yml` o'z nomi (`lrit`) ostida ishlaydi — boshqa loyihalarning konteyner va volume'lari bilan to'qnashmaydi.
 
 ## 0. Boshlashdan oldin tekshiring
@@ -71,12 +73,11 @@ nano .env
 To'ldirish:
 
 ```bash
-openssl rand -hex 24     # POSTGRES_PASSWORD, MINIO_SECRET_KEY uchun
+openssl rand -hex 24     # POSTGRES_PASSWORD uchun
 openssl rand -hex 32     # JWT_SECRET uchun
 ```
 
 - `POSTGRES_PASSWORD` ni yozing va **xuddi shu parolni** `DATABASE_URL` ichidagi `BU_YERGA_POSTGRES_PAROLI` o'rniga qo'ying.
-- `MINIO_ACCESS_KEY` — kamida 3 belgili nom (masalan `lritminio`), `MINIO_SECRET_KEY` — kamida 8 belgili parol. Qisqaroq bo'lsa MinIO ishga tushmaydi.
 - `GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `SMTP_*` — mavjud bo'lsa shu yerga. Bo'sh qolsa: AI yordamchi, bot va email xatlari (OTP, parolni tiklash) ishlamaydi, qolgan hammasi ishlaydi.
 - Qolganlarini (`PUBLIC_BASE_URL`, `CORS_ORIGINS`, `ENVIRONMENT`) o'zgartirmang.
 
@@ -87,6 +88,9 @@ Ishga tushirish (birinchi marta 5–15 daqiqa oladi — imidjlar yig'iladi):
 ```bash
 docker compose up -d --build
 docker compose ps                  # hammasi Up bo'lishi kerak
+
+# Xotira tor bo'lsa, Piston'siz (u eng og'ir): imidjini ham yuklamaydi
+# docker compose up -d postgres redis backend frontend bot nginx
 docker compose logs -f backend     # "Application startup complete" ko'ringach Ctrl+C
 curl -I http://127.0.0.1:8700/     # 200 OK
 ```
@@ -192,7 +196,7 @@ Kengaytirishgacha tayyor bo'lmagan domenlarda brauzer sertifikat nomuvofiqligi h
 - [ ] Admin sifatida kirish ishlaydi
 - [ ] Kurs yaratish, mavzu qo'shish ishlaydi
 - [ ] Mavzu sahifasida kod ishga tushadi (Piston tillari o'rnatilgan bo'lsa)
-- [ ] Mavzuga fayl biriktirish ishlaydi (MinIO)
+- [ ] Mavzuga fayl biriktirish ishlaydi (diskdagi `storage_data` volume'ga yoziladi)
 - [ ] (Agar sozlangan bo'lsa) ro'yxatdan o'tishda email kodi keladi, AI yordamchi javob beradi, bot `/start` ga javob beradi
 
 ## Yangilash (yangi kod chiqqanda)
@@ -224,8 +228,8 @@ docker compose exec -T postgres pg_dump -U edtech edtech | gzip > ~/lrit-db-$(da
 # Tiklash (bo'sh bazaga)
 gunzip -c ~/lrit-db-2026-01-01.sql.gz | docker compose exec -T postgres psql -U edtech edtech
 
-# Yuklangan fayllar va sertifikatlar (MinIO volume)
-docker run --rm -v lrit_minio_data:/data -v ~:/backup alpine tar czf /backup/lrit-minio-$(date +%F).tar.gz -C /data .
+# Yuklangan fayllar va sertifikatlar (storage volume)
+docker run --rm -v lrit_storage_data:/data -v ~:/backup alpine tar czf /backup/lrit-storage-$(date +%F).tar.gz -C /data .
 ```
 
 Kunlik avtomatik zaxira uchun `crontab -e` ga qo'shing:
