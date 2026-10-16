@@ -169,6 +169,20 @@ sudo certbot --nginx -d lr-it.uz -d www.lr-it.uz -d lr-it.neonsoft.uz
   sudo certbot renew --dry-run
   ```
 
+### DNS hali to'liq bo'lmasa (bosqichma-bosqich SSL)
+
+Certbot so'ralgan **har bir** domen serverga qarashini talab qiladi. Domenlardan biri hali tayyor bo'lmasa, faqat tayyorlari uchun sertifikat oling, qolganlarini keyin qo'shing:
+
+```bash
+# 1. Hozir DNS tayyor domen(lar) uchun, masalan:
+sudo certbot --nginx -d lr-it.neonsoft.uz
+
+# 2. Qolgan domenlar DNS'da paydo bo'lgach (dig +short lr-it.uz  → 164.92.240.184), sertifikatni kengaytiring:
+sudo certbot --nginx --expand -d lr-it.neonsoft.uz -d lr-it.uz -d www.lr-it.uz
+```
+
+Kengaytirishgacha tayyor bo'lmagan domenlarda brauzer sertifikat nomuvofiqligi haqida ogohlantiradi, bu kutilgan holat.
+
 > **Muhim:** `ENVIRONMENT=production` bo'lganda login cookie'lari faqat HTTPS orqali ishlaydi (`Secure`). SSL olinmaguncha saytga kirib bo'lmaydi — bu kutilgan holat.
 
 ## 6. Tekshiruv ro'yxati
