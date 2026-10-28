@@ -1,12 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { apiFetch } from "@/lib/api";
-import type { AnalyticsOverview, BroadcastHistoryItem, UserListResponse } from "@/lib/types";
+import type {
+  AnalyticsOverview,
+  BroadcastHistoryItem,
+  UserDetail,
+  UserListResponse,
+} from "@/lib/types";
 
 export function useAnalyticsOverview() {
   return useQuery({
     queryKey: ["admin", "analytics"],
     queryFn: () => apiFetch<AnalyticsOverview>("/admin/analytics/overview"),
+  });
+}
+
+export function useAdminUser(userId: string) {
+  return useQuery({
+    queryKey: ["admin", "user", userId],
+    queryFn: () => apiFetch<UserDetail>(`/users/${userId}`),
+    enabled: Boolean(userId),
+    retry: false,
   });
 }
 

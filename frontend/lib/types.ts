@@ -12,6 +12,26 @@ export interface UserPublic {
   created_at: string;
 }
 
+export const ROLE_LABELS: Record<UserPublic["role"], string> = {
+  student: "O'quvchi",
+  author: "Muallif",
+  admin: "Administrator",
+};
+
+export interface UserStats {
+  enrollments: number;
+  certificates: number;
+  authored_courses: number;
+  quiz_attempts: number;
+  qa_posts: number;
+}
+
+export interface UserDetail extends UserPublic {
+  stats: UserStats;
+  /** Bo'sh bo'lmasa, foydalanuvchini o'chirib bo'lmaydi. */
+  delete_blockers: string[];
+}
+
 export interface UserListResponse {
   items: UserPublic[];
   total: number;

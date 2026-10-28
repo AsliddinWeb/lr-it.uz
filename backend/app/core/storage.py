@@ -41,3 +41,12 @@ def _download_bytes_sync(object_key: str) -> bytes:
 
 async def download_bytes(object_key: str) -> bytes:
     return await asyncio.to_thread(_download_bytes_sync, object_key)
+
+
+def _delete_sync(object_key: str) -> None:
+    _resolve(object_key).unlink(missing_ok=True)
+
+
+async def delete(object_key: str) -> None:
+    """Faylni o'chiradi; fayl allaqachon yo'q bo'lsa, xato bermaydi."""
+    await asyncio.to_thread(_delete_sync, object_key)

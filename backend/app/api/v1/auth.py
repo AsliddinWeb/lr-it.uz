@@ -161,6 +161,11 @@ async def refresh(
     user = await db.get(User, uuid.UUID(payload["sub"]))
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sessiya tugagan")
+    if user.is_blocked:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Hisobingiz bloklangan. Administratorga murojaat qiling.",
+        )
 
     _set_auth_cookies(response, user)
     return {"message": "Sessiya yangilandi"}

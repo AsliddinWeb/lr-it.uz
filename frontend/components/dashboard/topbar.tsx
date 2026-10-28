@@ -67,15 +67,21 @@ const SEGMENT_TITLES: Record<string, string> = {
 
 // "new" / "edit" sahifalari — qaysi obyekt ustida ishlanayotganiga qarab.
 const NEW_TITLES: Record<string, string> = {
+  users: "Yangi foydalanuvchi",
   courses: "Yangi kurs",
   modules: "Yangi modul",
   lessons: "Yangi mavzu",
 };
 const EDIT_TITLES: Record<string, string> = {
+  users: "Foydalanuvchini tahrirlash",
   courses: "Kursni tahrirlash",
   modules: "Modulni tahrirlash",
   lessons: "Mavzuni tahrirlash",
   settings: "Profilni tahrirlash",
+};
+
+const DELETE_TITLES: Record<string, string> = {
+  users: "Foydalanuvchini o'chirish",
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -88,6 +94,7 @@ function pageTitle(pathname: string, role: string): string {
   if (!last) return PAGE_TITLES[role] ?? "Boshqaruv paneli";
   if (last === "new") return NEW_TITLES[parent] ?? "Yangi";
   if (last === "edit") return EDIT_TITLES[parent] ?? "Tahrirlash";
+  if (last === "delete") return DELETE_TITLES[parent] ?? "O'chirish";
   return SEGMENT_TITLES[last] ?? PAGE_TITLES[role] ?? "Boshqaruv paneli";
 }
 

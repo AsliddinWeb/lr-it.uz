@@ -110,6 +110,10 @@ docker compose exec backend python -m app.scripts.create_admin admin@lr-it.uz "I
 ```
 Kerak bo'lsa, shu buyruq mavjud foydalanuvchini administratorga aylantiradi va parolini yangilaydi.
 
+Keyingi foydalanuvchilar (adminlar ham) saytdan qo'shiladi: **Foydalanuvchilar → Yangi foydalanuvchi**. U yerda foydalanuvchini tahrirlash, bloklash va o'chirish ham alohida sahifalarda amalga oshiriladi.
+
+> **Ehtiyot bo'ling:** buyruqdagi `EMAIL` — shablon, uning o'rniga haqiqiy email yozing (aks holda `EMAIL` nomli foydalanuvchi yaratiladi).
+
 **Kod ijrosi (Piston) uchun tillar.** Piston tillarsiz keladi — ularni bir marta o'rnatish kerak (backend ishlatadigan versiyalar: Python 3.12.0 va C++ uchun gcc 10.2.0):
 
 ```bash

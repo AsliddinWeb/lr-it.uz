@@ -30,6 +30,12 @@ async def get_current_user(
     if user is None:
         raise unauthorized
 
+    if user.is_blocked:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Hisobingiz bloklangan. Administratorga murojaat qiling.",
+        )
+
     return user
 
 
@@ -44,7 +50,8 @@ async def get_current_user_optional(
     if payload is None or payload.get("type") != "access":
         return None
 
-    return await db.get(User, uuid.UUID(payload["sub"]))
+    user = await db.get(User, uuid.UUID(payload["sub"]))
+    return None if user is None or user.is_blocked else user
 
 
 def require_role(*roles: str):

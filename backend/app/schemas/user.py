@@ -40,6 +40,40 @@ class UserRoleUpdate(BaseModel):
     role: str = Field(pattern="^(student|author|admin)$")
 
 
+class UserAdminCreate(BaseModel):
+    """Administrator qo'lda yaratadigan hisob: email odatda darhol tasdiqlangan hisoblanadi."""
+
+    full_name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    role: str = Field(pattern="^(student|author|admin)$")
+    is_email_verified: bool = True
+
+
+class UserAdminUpdate(BaseModel):
+    """Faqat yuborilgan maydonlar o'zgaradi (PATCH)."""
+
+    full_name: str | None = Field(default=None, min_length=2, max_length=120)
+    email: EmailStr | None = None
+    role: str | None = Field(default=None, pattern="^(student|author|admin)$")
+    is_blocked: bool | None = None
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+
+
+class UserStats(BaseModel):
+    enrollments: int
+    certificates: int
+    authored_courses: int
+    quiz_attempts: int
+    qa_posts: int
+
+
+class UserDetail(UserPublic):
+    stats: UserStats
+    # Bo'sh bo'lmasa, foydalanuvchini o'chirib bo'lmaydi (sabablar ro'yxati).
+    delete_blockers: list[str]
+
+
 class UserSelfUpdate(BaseModel):
     full_name: str = Field(min_length=2, max_length=120)
 
