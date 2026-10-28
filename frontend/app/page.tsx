@@ -349,7 +349,7 @@ export default function HomePage() {
             Ro&apos;yxatdan o&apos;ting va birinchi kursingizga hoziroq so'rov bering.
           </p>
           <Button asChild size="lg" className="mt-6">
-            <Link href="/auth/register">Ro&apos;yxatdan o&apos;tish</Link>
+            <Link href="/auth?mode=register">Ro&apos;yxatdan o&apos;tish</Link>
           </Button>
         </div>
       </Reveal>

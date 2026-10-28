@@ -85,10 +85,10 @@ export function PublicNavbar() {
             ) : (
               <>
                 <Button asChild size="sm" variant="ghost">
-                  <Link href="/auth/login">Kirish</Link>
+                  <Link href="/auth?mode=login">Kirish</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link href="/auth/register">Ro&apos;yxatdan o&apos;tish</Link>
+                  <Link href="/auth?mode=register">Ro&apos;yxatdan o&apos;tish</Link>
                 </Button>
               </>
             )}
@@ -136,10 +136,10 @@ export function PublicNavbar() {
                 ) : (
                   <>
                     <Button asChild size="sm" variant="outline" className="flex-1">
-                      <Link href="/auth/login">Kirish</Link>
+                      <Link href="/auth?mode=login">Kirish</Link>
                     </Button>
                     <Button asChild size="sm" className="flex-1">
-                      <Link href="/auth/register">Ro&apos;yxatdan o&apos;tish</Link>
+                      <Link href="/auth?mode=register">Ro&apos;yxatdan o&apos;tish</Link>
                     </Button>
                   </>
                 )}

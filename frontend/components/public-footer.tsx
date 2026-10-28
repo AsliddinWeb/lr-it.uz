@@ -17,8 +17,8 @@ const TRACK_LINKS = (Object.keys(TRACK_LABELS) as (keyof typeof TRACK_LABELS)[])
 }));
 
 const START_LINKS = [
-  { label: "Ro'yxatdan o'tish", href: "/auth/register" },
-  { label: "Kirish", href: "/auth/login" },
+  { label: "Ro'yxatdan o'tish", href: "/auth?mode=register" },
+  { label: "Kirish", href: "/auth?mode=login" },
 ];
 
 function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {

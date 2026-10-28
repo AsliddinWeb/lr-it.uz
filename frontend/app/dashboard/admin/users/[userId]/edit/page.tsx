@@ -40,6 +40,9 @@ export default function AdminEditUserPage() {
     if (!isSelf && (values.status === "blocked") !== user.is_blocked) {
       payload.is_blocked = values.status === "blocked";
     }
+    if (values.is_email_verified !== user.is_email_verified) {
+      payload.is_email_verified = values.is_email_verified;
+    }
     if (values.password) payload.password = values.password;
 
     if (Object.keys(payload).length === 0) {
@@ -91,6 +94,7 @@ export default function AdminEditUserPage() {
               email: user.email,
               role: user.role,
               status: user.is_blocked ? "blocked" : "active",
+              is_email_verified: user.is_email_verified,
             }}
             onSubmit={handleSubmit}
           />

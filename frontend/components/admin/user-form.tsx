@@ -45,6 +45,7 @@ const editSchema = z.object({
     .max(128)
     .refine((v) => v === "" || v.length >= 8, "Parol kamida 8 belgidan iborat bo'lishi kerak"),
   status: z.enum(["active", "blocked"]),
+  is_email_verified: z.boolean(),
 });
 
 export type CreateUserValues = z.infer<typeof createSchema>;
@@ -281,6 +282,29 @@ function EditForm({
                   : "Bloklangan foydalanuvchi platformaga kira olmaydi va joriy sessiyasi to'xtatiladi."}
               </FormDescription>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="is_email_verified"
+          render={({ field }) => (
+            <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-border p-3">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                />
+              </FormControl>
+              <div className="space-y-0.5">
+                <FormLabel className="cursor-pointer">Email tasdiqlangan</FormLabel>
+                <FormDescription>
+                  Tasdiqlanmagan foydalanuvchi tizimga kira olmaydi. Email kodi kelmasa, shu yerdan qo&apos;lda
+                  tasdiqlashingiz mumkin.
+                </FormDescription>
+              </div>
             </FormItem>
           )}
         />

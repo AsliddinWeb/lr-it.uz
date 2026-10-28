@@ -141,6 +141,8 @@ async def _apply_update(db: AsyncSession, user: User, admin: User, fields: dict)
         user.role = new_role
     if block is not None:
         user.is_blocked = block
+    if fields.get("is_email_verified") is not None:
+        user.is_email_verified = fields["is_email_verified"]
     if fields.get("password"):
         user.password_hash = hash_password(fields["password"])
 

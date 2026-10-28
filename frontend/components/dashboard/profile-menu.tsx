@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Settings, User as UserIcon } from "lucide-react";
 
 import {
@@ -23,10 +24,13 @@ const ROLE_LABELS: Record<string, string> = {
 
 export function ProfileMenu({ user, trigger }: { user: UserPublic; trigger: ReactNode }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   async function handleLogout() {
     await apiFetch("/auth/logout", { method: "POST" }).catch(() => undefined);
-    router.push("/auth/login");
+    // Keshdagi foydalanuvchi ma'lumotlari qolib ketmasin: aks holda /auth sahifasi yana kirgan deb hisoblaydi.
+    queryClient.clear();
+    router.push("/auth?mode=login");
   }
 
   return (

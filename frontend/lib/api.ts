@@ -5,10 +5,16 @@ const NETWORK_ERROR_MESSAGE =
 
 export class ApiError extends Error {
   status: number;
+  /** Backend bergan mashina o'qiydigan kod (masalan "email_not_verified"); yo'q bo'lishi mumkin. */
+  code?: string;
+  /** Kodga qo'shimcha ma'lumotlar (masalan `retry_after`, `email`). */
+  extra: Record<string, unknown>;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code?: string, extra: Record<string, unknown> = {}) {
     super(message);
     this.status = status;
+    this.code = code;
+    this.extra = extra;
   }
 }
 
@@ -63,11 +69,22 @@ function messageFromStatus(status: number): string {
   return "So'rov bajarilmadi. Kiritilgan ma'lumotlarni tekshirib, qayta urinib ko'ring.";
 }
 
-function extractErrorMessage(status: number, data: unknown): string {
+function extractError(status: number, data: unknown): ApiError {
   const detail = (data as { detail?: unknown } | null)?.detail;
-  if (typeof detail === "string" && detail.trim()) return detail;
-  if (Array.isArray(detail) && detail.length > 0) return describeValidationIssue(detail[0]);
-  return messageFromStatus(status);
+  if (typeof detail === "string" && detail.trim()) return new ApiError(status, detail);
+  if (Array.isArray(detail) && detail.length > 0) {
+    return new ApiError(status, describeValidationIssue(detail[0]));
+  }
+  if (detail && typeof detail === "object") {
+    const { code, message, ...extra } = detail as Record<string, unknown>;
+    return new ApiError(
+      status,
+      typeof message === "string" && message ? message : messageFromStatus(status),
+      typeof code === "string" ? code : undefined,
+      extra
+    );
+  }
+  return new ApiError(status, messageFromStatus(status));
 }
 
 /** Har qanday xatodan foydalanuvchiga ko'rsatiladigan aniq xabar. */
@@ -83,6 +100,8 @@ const NO_REFRESH_PATHS = [
   "/auth/refresh",
   "/auth/logout",
   "/auth/verify-email",
+  "/auth/resend-code",
+  "/auth/google",
   "/auth/forgot-password",
   "/auth/reset-password",
 ];
@@ -132,7 +151,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new ApiError(res.status, extractErrorMessage(res.status, data));
+    throw extractError(res.status, data);
   }
 
   return data as T;

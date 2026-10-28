@@ -193,6 +193,49 @@ Kengaytirishgacha tayyor bo'lmagan domenlarda brauzer sertifikat nomuvofiqligi h
 
 > **Muhim:** `ENVIRONMENT=production` bo'lganda login cookie'lari faqat HTTPS orqali ishlaydi (`Secure`). SSL olinmaguncha saytga kirib bo'lmaydi — bu kutilgan holat.
 
+## Email yuborish (SMTP): kod kelmasa shu yerga qarang
+
+Ro'yxatdan o'tishda va parolni tiklashda 6 xonali kod emailga yuboriladi. **`SMTP_*` sozlanmagan bo'lsa**, production'da email orqali ro'yxatdan o'tish ishlamaydi (sayt buni ochiq aytadi), Google orqali kirish esa ishlayveradi.
+
+1. `.env` ga yozing (misol, Gmail):
+   ```
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=manzilingiz@gmail.com
+   SMTP_PASSWORD=abcdefghijklmnop
+   SMTP_FROM=EdTech <manzilingiz@gmail.com>
+   ```
+   Gmail uchun oddiy parol ishlamaydi: Google hisobida **2 bosqichli tekshiruvni yoqing**, so'ng <https://myaccount.google.com/apppasswords> dan 16 belgili **App password** oling. `SMTP_FROM` manzili `SMTP_USER` bilan bir xil bo'lsin. Gmail kuniga ~500 ta xat bilan cheklangan.
+2. Qo'llang va sinang:
+   ```bash
+   docker compose up -d --force-recreate backend
+   docker compose exec backend python -m app.scripts.send_test_email siz@gmail.com
+   ```
+   Skript `OK` yoki **aniq xato sababini** (parol noto'g'ri, port yopiq va hokazo) ko'rsatadi. Xat Spam papkasiga tushishi mumkin.
+3. Doimiy yechim uchun alohida xizmat tavsiya etiladi (Brevo, Resend, Mailgun: bepul tarifi bor) va o'z domeningizdan yuborish (`SPF` + `DKIM` yozuvlari). Shunda xatlar Spam'ga tushmaydi. Port 465 yozilsa, SSL avtomatik yoqiladi.
+
+**SMTP sozlanmaguncha:** admin foydalanuvchini **Foydalanuvchilar → Tahrirlash → "Email tasdiqlangan"** orqali qo'lda tasdiqlashi mumkin.
+
+## Google bilan kirish
+
+Bu usul email yuborishni talab qilmaydi, shuning uchun eng ishonchli kirish yo'li. Faqat **Client ID** kerak (secret kerak emas), backend uni runtime'da frontend'ga beradi, **qayta yig'ish shart emas**.
+
+1. <https://console.cloud.google.com> da loyiha yarating (yoki mavjudini tanlang).
+2. **APIs & Services → OAuth consent screen**: User type **External**, ilova nomi `EdTech`, support email, **Authorized domains**: `lr-it.uz`, `neonsoft.uz`. Scope'lar standart (`email`, `profile`, `openid`) qoladi. Oxirida **Publish app** (`In production`) bosing, aks holda faqat "Test users" ro'yxatidagilar kira oladi.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID**: Application type **Web application**.
+4. **Authorized JavaScript origins** ga qo'shing (redirect URI kerak emas):
+   - `https://lr-it.uz`
+   - `https://www.lr-it.uz`
+   - `https://lr-it.neonsoft.uz`
+   - lokal sinash uchun: `http://localhost:8700`
+5. Yaratilgan **Client ID** (`....apps.googleusercontent.com`) ni `.env` ga yozing:
+   ```
+   GOOGLE_CLIENT_ID=123456789-abcdef.apps.googleusercontent.com
+   ```
+6. Qo'llang: `docker compose up -d --force-recreate backend`. Sahifani yangilang: kirish sahifasida Google tugmasi paydo bo'ladi.
+
+Qoidalar: Google'da tasdiqlangan email kerak; shu email bilan oldin ro'yxatdan o'tgan hisob bo'lsa, u avtomatik Google'ga ulanadi (parol saqlanadi). Tasdiqlanmagan hisobga kimdir oldindan parol qo'ygan bo'lsa, Google orqali kirishda o'sha parol **bekor qilinadi**.
+
 ## 6. Tekshiruv ro'yxati
 
 - [ ] `https://lr-it.uz`, `https://www.lr-it.uz`, `https://lr-it.neonsoft.uz` ochiladi (qulf belgisi bilan)
@@ -201,7 +244,9 @@ Kengaytirishgacha tayyor bo'lmagan domenlarda brauzer sertifikat nomuvofiqligi h
 - [ ] Kurs yaratish, mavzu qo'shish ishlaydi
 - [ ] Mavzu sahifasida kod ishga tushadi (Piston tillari o'rnatilgan bo'lsa)
 - [ ] Mavzuga fayl biriktirish ishlaydi (diskdagi `storage_data` volume'ga yoziladi)
-- [ ] (Agar sozlangan bo'lsa) ro'yxatdan o'tishda email kodi keladi, AI yordamchi javob beradi, bot `/start` ga javob beradi
+- [ ] Ro'yxatdan o'tishda email kodi keladi (yoki `send_test_email` `OK` beradi)
+- [ ] (Agar `GOOGLE_CLIENT_ID` bo'lsa) kirish sahifasida Google tugmasi ko'rinadi va u orqali kirish ishlaydi
+- [ ] (Agar sozlangan bo'lsa) AI yordamchi javob beradi, bot `/start` ga javob beradi
 
 ## Yangilash (yangi kod chiqqanda)
 

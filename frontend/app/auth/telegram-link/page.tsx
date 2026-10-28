@@ -21,7 +21,7 @@ export default function TelegramLinkPage() {
 
   useEffect(() => {
     if (isError) {
-      router.push("/auth/login");
+      router.push("/auth?mode=login&next=%2Fauth%2Ftelegram-link");
     }
   }, [isError, router]);
 

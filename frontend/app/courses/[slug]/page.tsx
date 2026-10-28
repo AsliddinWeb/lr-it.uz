@@ -70,7 +70,7 @@ export default function CourseDetailPage() {
 
   async function handleApply() {
     if (!user) {
-      router.push("/auth/login");
+      router.push(`/auth?mode=login&next=${encodeURIComponent(`/courses/${params.slug}`)}`);
       return;
     }
     if (!course) return;

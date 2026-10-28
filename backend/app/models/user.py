@@ -21,6 +21,8 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[str] = mapped_column(UserRole, nullable=False, default="student", index=True)
     avatar_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Google hisobining barqaror identifikatori (ID tokendagi `sub`); bo'sh bo'lsa, hisob Google'ga ulanmagan.
+    google_sub: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
     telegram_chat_id: Mapped[int | None] = mapped_column(
         BigInteger, unique=True, nullable=True
     )

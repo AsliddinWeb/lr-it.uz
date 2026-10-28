@@ -38,12 +38,15 @@ export async function middleware(request: NextRequest) {
     (await roleFromToken(request.cookies.get("refresh_token")?.value, "refresh"));
 
   if (!role) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    const loginUrl = new URL("/auth", request.url);
+    loginUrl.searchParams.set("mode", "login");
+    loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
   }
 
   const allowedPrefix = ROLE_PREFIX[role];
   if (!allowedPrefix || !pathname.startsWith(allowedPrefix)) {
-    return NextResponse.redirect(new URL(allowedPrefix ?? "/auth/login", request.url));
+    return NextResponse.redirect(new URL(allowedPrefix ?? "/auth?mode=login", request.url));
   }
 
   return NextResponse.next();

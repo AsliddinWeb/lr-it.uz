@@ -57,6 +57,7 @@ class UserAdminUpdate(BaseModel):
     email: EmailStr | None = None
     role: str | None = Field(default=None, pattern="^(student|author|admin)$")
     is_blocked: bool | None = None
+    is_email_verified: bool | None = None
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
@@ -80,7 +81,15 @@ class UserSelfUpdate(BaseModel):
 
 class VerifyEmailRequest(BaseModel):
     email: EmailStr
-    code: str = Field(min_length=6, max_length=6)
+    code: str = Field(pattern=r"^\d{6}$")
+
+
+class ResendCodeRequest(BaseModel):
+    email: EmailStr
+
+
+class GoogleLoginRequest(BaseModel):
+    credential: str = Field(min_length=20, max_length=4096)
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -88,5 +97,13 @@ class ForgotPasswordRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    token: str
+    email: EmailStr
+    code: str = Field(pattern=r"^\d{6}$")
     new_password: str = Field(min_length=8, max_length=128)
+
+
+class AuthProviders(BaseModel):
+    """Frontend qaysi kirish usullarini ko'rsatishini aniqlaydi."""
+
+    google_client_id: str | None
+    email_enabled: bool

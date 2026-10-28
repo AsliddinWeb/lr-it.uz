@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = "EdTech <no-reply@edtech.local>"
 
+    # Google bilan kirish (Google Cloud Console → OAuth client ID, "Web application"). Bo'sh bo'lsa, tugma ko'rsatilmaydi.
+    GOOGLE_CLIENT_ID: str = ""
+
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8700"]
 
 
