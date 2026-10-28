@@ -4,6 +4,7 @@ import logging
 from email.message import EmailMessage
 
 import aiosmtplib
+import httpx
 
 from app.core.config import settings
 
@@ -16,14 +17,52 @@ class EmailDeliveryError(Exception):
     """Email yuborib bo'lmadi (SMTP sozlanmagan yoki server rad etdi)."""
 
 
+# Implicit TLS (SSL) portlari; qolgan portlarda server qo'llasa, STARTTLS avtomatik yoqiladi.
+_IMPLICIT_TLS_PORTS = {465, 2465}
+
+
 def email_enabled() -> bool:
-    return bool(settings.SMTP_HOST)
+    return bool(settings.RESEND_API_KEY or settings.SMTP_HOST)
+
+
+def email_transport() -> str:
+    """Hozir qaysi usul ishlatilishi: 'resend-api' | 'smtp' | 'none'."""
+    if settings.RESEND_API_KEY:
+        return "resend-api"
+    return "smtp" if settings.SMTP_HOST else "none"
+
+
+async def _send_via_resend(to: str, subject: str, body: str, html_body: str | None) -> None:
+    payload: dict = {"from": settings.SMTP_FROM, "to": [to], "subject": subject, "text": body}
+    if html_body:
+        payload["html"] = html_body
+    try:
+        async with httpx.AsyncClient(timeout=_SMTP_TIMEOUT_SECONDS) as client:
+            response = await client.post(
+                settings.RESEND_API_URL,
+                json=payload,
+                headers={"Authorization": f"Bearer {settings.RESEND_API_KEY}"},
+            )
+    except httpx.HTTPError as exc:
+        logger.error("Resend API bilan bog'lanib bo'lmadi (to=%s): %s", to, exc)
+        raise EmailDeliveryError(f"Resend API bilan bog'lanib bo'lmadi: {exc}") from exc
+
+    if response.status_code >= 400:
+        try:
+            reason = response.json().get("message") or response.text
+        except ValueError:
+            reason = response.text
+        logger.error("Resend API xatosi (to=%s): %s %s", to, response.status_code, reason)
+        raise EmailDeliveryError(f"Resend API {response.status_code}: {reason}")
 
 
 async def send_email(to: str, subject: str, body: str, html_body: str | None = None) -> None:
     """Email yuboradi. Yuborib bo'lmasa `EmailDeliveryError` ko'taradi — jimgina o'tkazib yubormaydi."""
     if not email_enabled():
-        raise EmailDeliveryError("SMTP sozlanmagan (SMTP_HOST bo'sh)")
+        raise EmailDeliveryError("Email yuborish sozlanmagan (RESEND_API_KEY ham, SMTP_HOST ham bo'sh)")
+    if settings.RESEND_API_KEY:
+        await _send_via_resend(to, subject, body, html_body)
+        return
 
     message = EmailMessage()
     message["From"] = settings.SMTP_FROM
@@ -33,7 +72,7 @@ async def send_email(to: str, subject: str, body: str, html_body: str | None = N
     if html_body:
         message.add_alternative(html_body, subtype="html")
 
-    implicit_tls = settings.SMTP_PORT == 465
+    implicit_tls = settings.SMTP_PORT in _IMPLICIT_TLS_PORTS
     try:
         await aiosmtplib.send(
             message,

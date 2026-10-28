@@ -193,28 +193,36 @@ Kengaytirishgacha tayyor bo'lmagan domenlarda brauzer sertifikat nomuvofiqligi h
 
 > **Muhim:** `ENVIRONMENT=production` bo'lganda login cookie'lari faqat HTTPS orqali ishlaydi (`Secure`). SSL olinmaguncha saytga kirib bo'lmaydi — bu kutilgan holat.
 
-## Email yuborish (SMTP): kod kelmasa shu yerga qarang
+## Email yuborish: kod kelmasa shu yerga qarang
 
-Ro'yxatdan o'tishda va parolni tiklashda 6 xonali kod emailga yuboriladi. **`SMTP_*` sozlanmagan bo'lsa**, production'da email orqali ro'yxatdan o'tish ishlamaydi (sayt buni ochiq aytadi), Google orqali kirish esa ishlayveradi.
+Ro'yxatdan o'tishda va parolni tiklashda 6 xonali kod emailga yuboriladi. Email sozlanmagan bo'lsa, production'da email orqali ro'yxatdan o'tish ishlamaydi (sayt buni ochiq aytadi), Google orqali kirish esa ishlayveradi.
 
-1. `.env` ga yozing (misol, Gmail):
+> **Muhim:** DigitalOcean serverlarida **SMTP portlari 25, 465 va 587 bloklangan** ([rasmiy hujjat](https://docs.digitalocean.com/support/why-is-smtp-blocked/)). Shuning uchun **Gmail SMTP bu serverda ishlamaydi** (`Timed out connecting to smtp.gmail.com`). Yechim: HTTPS (443-port) orqali ishlaydigan email xizmati.
+
+### Tavsiya: Resend (HTTPS API)
+
+1. <https://resend.com> da ro'yxatdan o'ting.
+2. **Domains → Add Domain** → `lr-it.uz`. Resend bir nechta **DNS yozuvlarini** beradi (SPF, DKIM, odatda 3 tadan 4 tagacha TXT/MX). Ularni `lr-it.uz` ning DNS panelida (A yozuvlarini qo'shgan joyingizda) kiriting, so'ng Resend'da **Verify** bosing. Status **Verified** bo'lishi kerak (bir necha daqiqadan bir necha soatgacha).
+3. **API Keys → Create API Key** (ruxsat: *Sending access*). `re_...` bilan boshlanadigan kalitni nusxalang, u faqat bir marta ko'rsatiladi.
+4. `.env` ga yozing:
    ```
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=manzilingiz@gmail.com
-   SMTP_PASSWORD=abcdefghijklmnop
-   SMTP_FROM=EdTech <manzilingiz@gmail.com>
+   RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
+   SMTP_FROM=EdTech <no-reply@lr-it.uz>
    ```
-   Gmail uchun oddiy parol ishlamaydi: Google hisobida **2 bosqichli tekshiruvni yoqing**, so'ng <https://myaccount.google.com/apppasswords> dan 16 belgili **App password** oling. `SMTP_FROM` manzili `SMTP_USER` bilan bir xil bo'lsin. Gmail kuniga ~500 ta xat bilan cheklangan.
-2. Qo'llang va sinang:
+   `SMTP_FROM` dagi manzil **tasdiqlangan domeningizdan** bo'lishi shart (`...@lr-it.uz`), aks holda Resend rad etadi. (`SMTP_HOST` va boshqa `SMTP_*` qatorlari bo'sh qolsa bo'ladi.)
+5. Qo'llang va sinang:
    ```bash
    docker compose up -d --force-recreate backend
    docker compose exec backend python -m app.scripts.send_test_email siz@gmail.com
    ```
-   Skript `OK` yoki **aniq xato sababini** (parol noto'g'ri, port yopiq va hokazo) ko'rsatadi. Xat Spam papkasiga tushishi mumkin.
-3. Doimiy yechim uchun alohida xizmat tavsiya etiladi (Brevo, Resend, Mailgun: bepul tarifi bor) va o'z domeningizdan yuborish (`SPF` + `DKIM` yozuvlari). Shunda xatlar Spam'ga tushmaydi. Port 465 yozilsa, SSL avtomatik yoqiladi.
+   `OK` chiqsa, xat keladi. Xato bo'lsa, skript **Resend bergan sababni** ko'rsatadi (masalan, "domain is not verified").
 
-**SMTP sozlanmaguncha:** admin foydalanuvchini **Foydalanuvchilar → Tahrirlash → "Email tasdiqlangan"** orqali qo'lda tasdiqlashi mumkin.
+Resend'ning bepul tarifi kichik loyiha uchun yetarli (hozirgi limitlar uchun resend.com/pricing ga qarang).
+
+### Muqobil: oddiy SMTP
+`RESEND_API_KEY` bo'sh bo'lsa, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` ishlatiladi. Bu portlar ochiq bo'lgan serverda ishlaydi. Port `465` va `2465` da SSL avtomatik yoqiladi, boshqa portlarda server qo'llasa STARTTLS. Resend SMTP'si ham mavjud (`smtp.resend.com`, login `resend`, parol: API key, port `2587` STARTTLS yoki `2465` SSL), lekin bu portlar DigitalOcean'da amalda ochiqligini bu yerda tasdiqlamadik: ishonchli yo'l API.
+
+**Email sozlanmaguncha:** admin foydalanuvchini **Foydalanuvchilar → Tahrirlash → "Email tasdiqlangan"** orqali qo'lda tasdiqlashi mumkin.
 
 ## Google bilan kirish
 

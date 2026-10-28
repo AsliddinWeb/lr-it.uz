@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = "EdTech <no-reply@edtech.local>"
 
+    # Email yuborishning ikkinchi yo'li: Resend HTTPS API (443-port). DigitalOcean kabi joylarda SMTP portlari
+    # (25/465/587) bloklangan bo'lgani uchun aynan shu tavsiya etiladi. Bo'sh bo'lsa, SMTP_* ishlatiladi.
+    RESEND_API_KEY: str = ""
+    RESEND_API_URL: str = "https://api.resend.com/emails"
+
     # Google bilan kirish (Google Cloud Console → OAuth client ID, "Web application"). Bo'sh bo'lsa, tugma ko'rsatilmaydi.
     GOOGLE_CLIENT_ID: str = ""
 
